@@ -142,37 +142,35 @@ endfunction
 
 
 
-/////////////////////////////           Code Sagna
-
-function GP = Newtonp2(nbre_point,nbre_iter)
-//nbre_point=513;
+function [G,P] = Newtonp2(nb_quant,nb_iter)
+//nb_quant=513;
 //nbre_iter=50;
 stacksize(20000000);
 rac2pi=1/(sqrt(%pi * 2));   
 
 a=-0.5;   b=0.5; 
-grille = linspace(a,b,nbre_point)';
-Moy=zeros(nbre_point,1);   Var=ones(nbre_point,1);
-Moy1=Moy(1:nbre_point-1);  Var1=Var(1:nbre_point-1);
+grille = linspace(a,b,nb_iter)';
+Moy=zeros(nb_iter,1);   Var=ones(nb_iter,1);
+Moy1=Moy(1:nb_iter-1);  Var1=Var(1:nb_iter-1);
 for i=1:nbre_iter;
-   C = 0.5*(grille(1:nbre_point-1)+grille(2:nbre_point));
+   C = 0.5*(grille(1:nb_iter-1)+grille(2:nb_iter));
    P=cdfnor("PQ",grille,Moy,Var);
    Q=cdfnor("PQ",C,Moy1,Var1);
    expo=rac2pi.*exp(-0.5.*C.^2); expdiag=rac2pi.*exp(-0.5.*grille.^2);
-   grillem=grille(1:nbre_point-1) ; grillep=grille(2:nbre_point); 
+   grillem=grille(1:nb_iter-1) ; grillep=grille(2:nb_iter); 
    gradient=grille.*([Q;1]-[0;Q]) + [expo;0]-[0;expo];
    
    D=-0.25.*(grille-[0;grillem]).*([0;expo])+ 0.25.*(grille-[grillep;0]).*([expo;0])+ [Q;1]-[0;Q]
    D=diag(D);
    V1=-0.25.*([0;expo]).*(grille-[0;grillem]);
    U1=-0.25.*([expo;0]).*([grillep;0]-grille);
-   U=diag(U1)*diag(ones(nbre_point-1,1),1);
-   V=diag(V1)*diag(ones(nbre_point-1,1),-1);
+   U=diag(U1)*diag(ones(nb_iter-1,1),1);
+   V=diag(V1)*diag(ones(nb_iter-1,1),-1);
    hessien=U+D+V;
    A=hessien\gradient;
    grille=grille - A; 
 end
- C = 0.5*(grille(1:nbre_point-1)+grille(2:nbre_point));
+ C = 0.5*(grille(1:nb_iter-1)+grille(2:nb_iter));
  Q=cdfnor("PQ",C,Moy1,Var1);
  expo=rac2pi.*exp(-0.5.*C.^2); 
  distor_local = ([0;expo]).*([0;C]-2*grille)+([expo;0]).*(-[C;0]+2*grille)+(1+grille.^2).*([Q;1]-[0;Q]);
